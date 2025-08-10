@@ -218,13 +218,17 @@ local function ensure_vimleave_autocmd()
       for tab, sess in pairs(M._state.sessions_by_tab) do
         pcall(function()
           if sess and sess.worktree_path then
-            local cwd = sess.worktree_path
-            exec_git({ "add", "-A" }, cwd)
+            local wcwd = sess.worktree_path
+            -- stage/commit from within the worktree
+            exec_git({ "add", "-A" }, wcwd)
             exec_git({ "commit", "-m", string.format(
               "wip(llm-legion): %s/%s @ %s [%s]",
               sess.provider, sess.name, iso8601_utc(), sess.id
-            ) }, cwd)
-            exec_git({ "worktree", "remove", "--force", cwd })
+            ) }, wcwd)
+            -- Leave worktree as process CWD before removal to avoid rmdir issues
+            pcall(vim.cmd, "cd " .. vim.fn.fnameescape(sess.repo_root or wcwd .. "/.."))
+            -- remove from repo root for reliability
+            exec_git({ "worktree", "remove", "--force", wcwd }, sess.repo_root)
           end
         end)
         M._state.sessions_by_tab[tab] = nil
@@ -250,7 +254,9 @@ local function git_commit_if_needed(sess)
 end
 
 local function git_remove_worktree(sess)
-  local rc, _o2, _e2 = exec_git({ "worktree", "remove", "--force", sess.worktree_path })
+  -- Run removal from the repo root to avoid failures when CWD is the worktree
+  local root = sess.repo_root or abspath(sess.worktree_path .. "/..")
+  local rc, _o2, _e2 = exec_git({ "worktree", "remove", "--force", sess.worktree_path }, root)
   if rc ~= 0 then
     notify("git worktree remove failed for '" .. sess.worktree_path .. "'", vim.log.levels.WARN)
   end
@@ -270,6 +276,11 @@ local function open_session_tab(cfg, sess)
   local job = vim.fn.termopen(cmd, { cwd = sess.worktree_path, on_exit = function()
     -- on exit: auto-commit changes then remove worktree
     local function cleanup()
+      -- If process CWD is inside the worktree, leave it to allow deletion
+      local cur_cwd = vim.fn.getcwd()
+      if is_path_inside(cur_cwd, sess.worktree_path) then
+        pcall(vim.cmd, "tcd " .. vim.fn.fnameescape(sess.repo_root))
+      end
       git_commit_if_needed(sess)
       git_remove_worktree(sess)
       -- Close buffers/windows
@@ -316,6 +327,7 @@ local function open_session_tab(cfg, sess)
     bufnr = bufnr,
     worktree_path = sess.worktree_path,
     branch = sess.branch,
+    repo_root = sess.repo_root,
   }
 end
 
@@ -419,6 +431,7 @@ function M.session_cmd(args)
     provider = provider,
     worktree_path = p.worktree_path,
     branch = p.branch,
+    repo_root = root,
   })
 end
 
@@ -504,4 +517,3 @@ M._test = {
 }
 
 return M
-

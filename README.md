@@ -51,6 +51,7 @@
   dependencies = {
     "nvim-lua/plenary.nvim", -- Required for tests only
   },
+  cmd = { "LLMSession", "LLMAbort", "LLMCleanup" }, -- Load plugin when these commands are used
   config = function()
     require("llm_legion").setup({
       -- your configuration

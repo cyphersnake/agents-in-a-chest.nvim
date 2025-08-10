@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-08-10
+
+### Fixed
+- Cleanup no longer leaves worktree directories behind in rare cases:
+  - Avoid removing a worktree while CWD is inside it
+  - Run `git worktree remove` from the repository root
+  - Store `repo_root` per session for reliable cleanup
+  - Improve VimLeave cleanup path accordingly
+
+### Tests
+- Add cleanup stability spec to assert no leaf worktree directories remain after session exit
+
 ## [0.1.0] - 2025-01-10
 
 ### Added
@@ -29,5 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Worktrees are always created outside the repository
 - Provider CLIs require external authentication
 
-[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.1.0...HEAD
+[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.1.1...HEAD
+[0.1.1]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.1
 [0.1.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.0
