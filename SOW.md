@@ -1,4 +1,4 @@
-# Statement of Work — `llm-worktree.nvim` MVP
+# Statement of Work — `llm-legion.nvim` MVP
 
 ## Objective
 
@@ -22,7 +22,7 @@ Implement a Neovim plugin that launches an LLM coding agent (`claude` or `codex`
 2. **Compute paths**:
 
    * `repo_parent = realpath(repo_root)/..`
-   * `worktrees_root = repo_parent/.llm-worktrees`
+   * `worktrees_root = repo_parent/.<repo>-worktrees`
    * `repo_key = <basename(repo_root)>-<short_hash(realpath(repo_root))>`
    * `SessionID = YYYYMMDD-HHMMSS-<5hex>`
    * `session_suffix = <SessionID>-<slug>`
@@ -43,7 +43,7 @@ Implement a Neovim plugin that launches an LLM coding agent (`claude` or `codex`
    * **Auto‑commit** (if there are changes):
 
      * `git add -A`
-     * `git commit -m "wip(llm-worktree): <provider>/<slug> @ <ISO8601> [<SessionID>]"`
+     * `git commit -m "wip(llm-legion): <provider>/<slug> @ <ISO8601> [<SessionID>]"`
        If there’s nothing to commit, skip without error.
    * **Cleanup**:
 
@@ -84,8 +84,8 @@ Implement a Neovim plugin that launches an LLM coding agent (`claude` or `codex`
 ## Configuration (minimal)
 
 ```lua
-require("llm_worktree").setup({
-  worktrees_root = nil, -- default: realpath(repo_root)/"../.llm-worktrees"
+require("llm_legion").setup({
+  worktrees_root = nil, -- default: realpath(repo_root)/"../.<repo>-worktrees"
   default_base   = "HEAD",
   providers = {
     claude = { cmd = "claude", args = {} },
@@ -101,7 +101,7 @@ require("llm_worktree").setup({
 
 * Plugin repo with:
 
-  * `lua/llm_worktree/init.lua` (core),
+  * `lua/llm_legion/init.lua` (core),
   * `README.md` (install, usage, constraints, path layout, JIT‑WTR policy),
   * Minimal tests (Plenary/Busted) covering:
 
@@ -115,14 +115,14 @@ require("llm_worktree").setup({
 
 * From any Git repo, `:LLMSession <provider> --name <slug>`:
 
-  * Creates a new worktree at `<repo_parent>/.llm-worktrees/<repo_key>/<SessionID>-<slug>`,
+  * Creates a new worktree at `<repo_parent>/.<repo>-worktrees/<repo_key>/<SessionID>-<slug>`,
   * On a new branch `llm/<provider>/<SessionID>-<slug>` based on `<base>`,
   * Opens a new tab/terminal running the provider with `cwd = worktree_path`.
 * On terminal exit (or `:LLMAbort`):
 
-  * If there are changes, a commit with message `wip(llm-worktree): <provider>/<slug> @ <ISO8601> [<SessionID>]` is created on the session branch.
+  * If there are changes, a commit with message `wip(llm-legion): <provider>/<slug> @ <ISO8601> [<SessionID>]` is created on the session branch.
   * The terminal buffer is closed; the tab is closed **only** if it contains no other windows.
   * The worktree directory is removed (`git worktree remove --force <path>`), and the branch **remains**.
 * Multiple sessions can be started/closed independently without interfering with each other.
 * `:LLMCleanup` safely removes abandoned session directories and prunes stale Git metadata.
-* Errors surface via `vim.notify` with a consistent `[llm-worktree]` prefix.
+* Errors surface via `vim.notify` with a consistent `[llm-legion]` prefix.

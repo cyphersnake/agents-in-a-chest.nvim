@@ -1,0 +1,131 @@
+*llm-legion.txt*  Launch LLM coding agents in isolated Git worktrees
+
+Author:  cyphersnake
+License: MIT
+Repo:    https://codeberg.org/cyphersnake/llm-legion.nvim
+
+INTRODUCTION                                    *llm-legion*
+
+llm-legion.nvim provides isolated Git worktree environments for LLM coding
+agents. Each session runs in its own worktree outside your repository, with
+automatic commit and cleanup on exit.
+
+CONTENTS                                        *llm-legion-contents*
+
+1. Commands.................................|llm-legion-commands|
+2. Configuration............................|llm-legion-config|
+3. Functions................................|llm-legion-functions|
+4. Mappings.................................|llm-legion-mappings|
+
+==============================================================================
+COMMANDS                                        *llm-legion-commands*
+
+                                                *:LLMSession*
+:LLMSession {provider} --name {slug} [--base {ref}]
+    Start a new LLM session with the specified provider.
+    
+    {provider}  Name of configured provider (e.g., 'claude', 'codex')
+    {slug}      Human-readable name for the session (sanitized to [a-z0-9._-]+)
+    {ref}       Optional Git ref to base worktree on (default: HEAD)
+    
+    Example: >
+        :LLMSession claude --name refactor-auth --base develop
+<
+                                                *:LLMAbort*
+:LLMAbort
+    Abort the LLM session in the current tab. Triggers auto-commit and
+    cleanup of the worktree.
+
+                                                *:LLMCleanup*
+:LLMCleanup
+    Clean up orphaned worktree directories and prune Git metadata.
+    Safe to run anytime.
+
+==============================================================================
+CONFIGURATION                                   *llm-legion-config*
+
+Setup function: >
+    require('llm_legion').setup({
+        -- options
+    })
+<
+Options:
+
+worktrees_root                          *llm-legion.worktrees_root*
+    Type: `string|nil`
+    Default: `nil` (auto-computed as <repo_parent>/.<repo_name>-worktrees)
+    
+    Custom location for worktree directories.
+
+worktrees_prefix                        *llm-legion.worktrees_prefix*
+    Type: `string|nil`
+    Default: `nil` (uses repository name)
+    
+    Custom prefix for worktree directory names.
+
+default_base                            *llm-legion.default_base*
+    Type: `string`
+    Default: `"HEAD"`
+    
+    Default Git ref for new worktrees.
+
+providers                               *llm-legion.providers*
+    Type: `table`
+    Default: >
+        {
+            claude = { cmd = "claude", args = {} },
+            codex = { cmd = "codex", args = {} }
+        }
+<
+    Provider configurations. Each provider needs:
+    - `cmd`: Command to execute
+    - `args`: Optional arguments array
+
+Example configuration: >
+    require('llm_legion').setup({
+        worktrees_prefix = "ai",
+        default_base = "main",
+        providers = {
+            claude = { 
+                cmd = "claude",
+                args = {} 
+            },
+            aider = {
+                cmd = "aider",
+                args = { "--yes-always" }
+            }
+        }
+    })
+<
+==============================================================================
+FUNCTIONS                                       *llm-legion-functions*
+
+setup({config})                                 *llm_legion.setup()*
+    Initialize the plugin with given configuration.
+    
+    Parameters: ~
+        {config}  Optional configuration table
+
+session_cmd({args})                             *llm_legion.session_cmd()*
+    Internal function called by :LLMSession command.
+    
+    Parameters: ~
+        {args}  Array of command arguments
+
+abort_current()                                 *llm_legion.abort_current()*
+    Abort session in current tab. Called by :LLMAbort.
+
+cleanup()                                       *llm_legion.cleanup()*
+    Clean up orphaned worktrees. Called by :LLMCleanup.
+
+==============================================================================
+MAPPINGS                                        *llm-legion-mappings*
+
+No default mappings are provided. Example mappings: >
+    vim.keymap.set("n", "<leader>lc", ":LLMSession claude --name session<CR>")
+    vim.keymap.set("n", "<leader>lx", ":LLMSession codex --name session<CR>")
+    vim.keymap.set("n", "<leader>la", ":LLMAbort<CR>")
+<
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
+

@@ -1,0 +1,24 @@
+# Test artifacts
+tests/vendor/
+.llm-worktrees/
+*.log
+
+# Neovim
+.netrwhist
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Build artifacts
+*.rock
+
+# Local development
+.env
+.envrc
+.direnv/

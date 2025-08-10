@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Neovim plugin called `llm-legion` (planned name: `llm-worktree.nvim`) that launches LLM coding agents in isolated Git worktrees. The plugin creates temporary worktrees outside the main working tree, runs the agent in a terminal tab, and automatically commits changes when the session ends.
+This is a Neovim plugin called `llm-legion` (formerly planned as `llm-worktree.nvim`) that launches LLM coding agents in isolated Git worktrees. The plugin creates temporary worktrees outside the main working tree, runs the agent in a terminal tab, and automatically commits changes when the session ends.
 
 ## Build and Development Commands
 
@@ -27,7 +27,7 @@ This is a Neovim plugin called `llm-legion` (planned name: `llm-worktree.nvim`) 
 ### Key Implementation Details
 
 1. **Worktree Management**:
-   - Creates worktrees at `<repo_parent>/.llm-worktrees/<repo_key>/<session_suffix>`
+   - Creates worktrees at `<repo_parent>/.<repo>-worktrees/<repo_key>/<session_suffix>`
    - Branch naming: `llm/<provider>/<SessionID>-<slug>`
    - Uses JIT (Just-In-Time) policy: add → run → commit → remove
 
@@ -62,7 +62,7 @@ This is a Neovim plugin called `llm-legion` (planned name: `llm-worktree.nvim`) 
 - **Indentation**: 2 spaces, UTF-8, max line ~100 chars
 - **File naming**: `snake_case.lua`
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
-- **Error handling**: Use `vim.notify` with `[llm-worktree]` prefix
+- **Error handling**: Use `vim.notify` with `[llm-legion]` prefix
 - **Async operations**: Use `vim.system` for Git calls, avoid blocking main loop
 
 ## Security Considerations
