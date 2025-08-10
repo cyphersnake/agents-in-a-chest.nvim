@@ -28,25 +28,27 @@
 
 ## ✨ Features
 
-`llm-legion.nvim` provides a sandboxed environment for LLM coding agents (Claude, Codex, etc.) to work on your codebase without affecting your main working tree:
+A focused flow: create a few agents, close them, then cherry-pick their work back to your base branch.
 
-- 🎯 **Isolated Worktrees** - Each LLM session runs in its own Git worktree outside your repository
-- 🔄 **Auto-commit on Exit** - Changes are automatically committed when the session ends
-- 🪄 **Auto-finalize** - Closing the session tab or terminal prompts to land changes via Neogit (no need to run `:LLMEnd` manually)
-- 🧭 **Interactive Landing** - Cherry-pick onto base branch with Neogit, prefilled commit message, and interactive staging
-- 🥽 **Safe State Handling** - Auto-stash dirty base branch before landing and restore after commit; preserve `llm/...` branch for provenance
-- 🌳 **Branch Preservation** - Worktree is removed but branches remain for easy merging
-- 📑 **Tab-based Sessions** - Each session opens in a new Neovim tab with terminal
-- 🚀 **Concurrent Sessions** - Run multiple LLM agents simultaneously without conflicts
-- 🧹 **Smart Cleanup** - Automatic cleanup of worktrees with orphan detection
+- 🎯 **Isolated worktrees**: each agent runs in its own Git worktree
+- 🚀 **Multiple agents**: start several sessions in parallel (one tab each)
+- 🔄 **Auto-commit on exit**: closing the tab finalizes the session safely
+- 🧭 **Cherry-pick landing**: use Neogit to land changes onto your base branch
+- 🌳 **Branch provenance**: `llm/...` branches are preserved for review/audits
+- 🧹 **Smart cleanup**: worktrees are cleaned; base branch is auto-stashed/restored if dirty
 
 ## 🎬 Demo
 
 ```vim
+" 1) Start a couple of agents
 :LLMSession claude --name refactor-auth
-" Opens new tab with Claude in isolated worktree
-" Work happens in .myrepo-worktrees/myrepo-abc1234/20250110-143022-5fa3c-refactor-auth/
-" On exit: commits changes, removes worktree, keeps branch llm/claude/20250110-143022-5fa3c-refactor-auth
+:LLMSession codex  --name add-tests
+
+" 2) Work with each agent in its tab
+
+" 3) Close the agent tabs when done
+"    On close: auto-commit, prompt to land via Neogit, cherry-pick -n
+"    Worktree is removed; branch llm/<provider>/<id>-<slug> is preserved
 ```
 
 ## 📦 Installation
@@ -98,55 +100,27 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 
 ## 🚀 Usage
 
-### Basic Commands
+### Main Flow
 
 ```vim
-" Start a new LLM session
-:LLMSession claude --name implement-feature
+" 1) Create a few agents (parallel tabs)
+:LLMSession claude --name refactor-auth      " base: HEAD by default
+:LLMSession codex  --name add-tests --base develop
 
-" Start from specific branch/commit
-:LLMSession codex --name fix-bug --base develop
+" 2) Collaborate with each agent in its tab
+"    Edit, run, iterate — all inside isolated worktrees
 
-" Abort current session (auto-commits and cleans up)
-:LLMAbort
+" 3) Close the agent tabs when done
+"    This triggers auto-commit and the landing prompt (Neogit)
 
-" Clean up orphaned worktrees
-:LLMCleanup
-
-" End session and optionally land on base branch via Neogit
-:LLMEnd
-
-Note: Closing the LLM session tab (or exiting its terminal) automatically triggers the same finalize flow as `:LLMEnd`:
-- You’ll be prompted to land onto the detected base branch
-- Neogit opens with the agent’s commit message prefilled
-- After committing, the session worktree is removed while the `llm/...` branch is preserved
+" 4) In Neogit, cherry-pick -n onto your base branch
+"    Review, stage if needed, then commit with the prefilled message
 ```
 
-### Workflow Example
-
-1. **Start a session** with your preferred LLM:
-   ```vim
-   :LLMSession claude --name add-tests
-   ```
-
-2. **The plugin automatically**:
-   - Creates worktree at `../.myrepo-worktrees/myrepo-7fa3c4d/20250110-143022-5fa3c-add-tests/`
-   - Creates branch `llm/claude/20250110-143022-5fa3c-add-tests`
-   - Opens new tab with terminal running `claude`
-
-3. **Work with the LLM** in the isolated environment
-
-4. **On exit** (or `:LLMAbort`):
-  - Auto-commits changes with message: `wip(llm-legion): claude/add-tests @ 2025-01-10T14:35:22Z [20250110-143022-5fa3c]`
-  - Prompts to land onto base branch (detected from repo or configured)
-  - Opens Neogit with changes applied (no-commit) and the agent’s message prefilled
-  - After commit: removes the worktree; preserves `llm/...` branch
-
-5. **Review and merge**:
-   ```bash
-   git log llm/claude/20250110-143022-5fa3c-add-tests
-   git merge llm/claude/20250110-143022-5fa3c-add-tests
-   ```
+Notes:
+- `:LLMEnd` is optional; closing the tab runs the same finalize flow.
+- `:LLMAbort` force-ends the current session (also safe).
+- `:LLMCleanup` removes orphan worktrees if anything gets stuck.
 
 ## ⚙️ Configuration
 

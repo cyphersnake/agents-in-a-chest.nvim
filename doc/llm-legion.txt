@@ -10,6 +10,18 @@ llm-legion.nvim provides isolated Git worktree environments for LLM coding
 agents. Each session runs in its own worktree outside your repository, with
 automatic commit and cleanup on exit.
 
+QUICK FLOW                                      *llm-legion-flow*
+
+1. Start a few agents: >
+    :LLMSession claude --name refactor-auth
+    :LLMSession codex  --name add-tests --base develop
+<
+2. Work in each agent's tab (isolated worktrees).
+3. Close each tab when finished. On close: auto-commit, then prompt to land
+   via Neogit using cherry-pick -n with a prefilled message.
+4. Complete the Neogit commit. The worktree is removed; the `llm/...` branch
+   is preserved for provenance or later merging.
+
 CONTENTS                                        *llm-legion-contents*
 
 1. Commands.................................|llm-legion-commands|
@@ -148,8 +160,9 @@ cleanup()                                       *llm_legion.cleanup()*
 MAPPINGS                                        *llm-legion-mappings*
 
 No default mappings are provided. Example mappings: >
-    vim.keymap.set("n", "<leader>lc", ":LLMSession claude --name session<CR>")
-    vim.keymap.set("n", "<leader>lx", ":LLMSession codex --name session<CR>")
+    vim.keymap.set("n", "<leader>lc", ":LLMSession claude --name refactor<CR>")
+    vim.keymap.set("n", "<leader>lx", ":LLMSession codex --name tests<CR>")
+    vim.keymap.set("n", "<leader>le", ":LLMEnd<CR>")       -- optional, closing the tab also ends
     vim.keymap.set("n", "<leader>la", ":LLMAbort<CR>")
 <
 ==============================================================================
