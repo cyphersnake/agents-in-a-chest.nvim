@@ -292,8 +292,13 @@ local function open_session_tab(cfg, sess)
     notify("failed to start provider terminal; rolling back worktree", vim.log.levels.ERROR)
     git_commit_if_needed(sess)
     git_remove_worktree(sess)
-    -- Close the tab we opened
-    pcall(vim.cmd, 'tabclose')
+    -- Close the tab we opened, but only if it still exists
+    pcall(function()
+      if tab and vim.api.nvim_tabpage_is_valid and vim.api.nvim_tabpage_is_valid(tab) then
+        local ok = pcall(vim.api.nvim_set_current_tabpage, tab)
+        if ok then pcall(vim.cmd, 'tabclose') end
+      end
+    end)
     return
   end
 

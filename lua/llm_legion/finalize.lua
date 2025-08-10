@@ -199,6 +199,16 @@ function M.end_session(sess)
   if cur_sess.finalizing then return end
   cur_sess.finalizing = true
 
+  local function close_session_tab()
+    -- Close the session's tab specifically, without touching others
+    if cur_sess and cur_sess.tab then
+      local ok_switch = pcall(vim.api.nvim_set_current_tabpage, cur_sess.tab)
+      if ok_switch then
+        pcall(vim.cmd, 'tabclose')
+      end
+    end
+  end
+
   -- Ensure any pending changes in worktree are committed
   git_commit_if_needed(cur_sess)
   local sha, _e = G.rev_parse("HEAD", cur_sess.worktree_path)
@@ -216,8 +226,7 @@ function M.end_session(sess)
       -- Nothing to land; just cleanup
       remove_worktree(cur_sess)
       core._state.sessions_by_tab[cur_sess.tab] = nil
-      if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-      pcall(vim.cmd, 'tabclose')
+      close_session_tab()
       notify("no changes to land; worktree cleaned up")
       return
     end
@@ -228,8 +237,7 @@ function M.end_session(sess)
   if cur_sess.abort then
     remove_worktree(cur_sess)
     core._state.sessions_by_tab[cur_sess.tab] = nil
-    if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-    pcall(vim.cmd, 'tabclose')
+    close_session_tab()
     notify("session aborted; worktree cleaned up")
     return
   end
@@ -243,8 +251,7 @@ function M.end_session(sess)
     -- Just remove worktree; keep branch for provenance
     remove_worktree(cur_sess)
     core._state.sessions_by_tab[cur_sess.tab] = nil
-    if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-    pcall(vim.cmd, 'tabclose')
+    close_session_tab()
     return
   end
 
@@ -253,8 +260,7 @@ function M.end_session(sess)
     -- Clean up worktree; keep branch
     remove_worktree(cur_sess)
     core._state.sessions_by_tab[cur_sess.tab] = nil
-    if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-    pcall(vim.cmd, 'tabclose')
+    close_session_tab()
     return
   end
 
@@ -283,8 +289,7 @@ function M.end_session(sess)
     -- remove worktree and close tab; keep branch intact
     remove_worktree(cur_sess)
     core._state.sessions_by_tab[cur_sess.tab] = nil
-    if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-    pcall(vim.cmd, 'tabclose')
+    close_session_tab()
     return
   end
 
@@ -311,8 +316,7 @@ function M.end_session(sess)
     -- remove worktree and close tab
     remove_worktree(cur_sess)
     core._state.sessions_by_tab[cur_sess.tab] = nil
-    if cur_sess.tabnr then core._state.sessions_by_tabnr[cur_sess.tabnr] = nil end
-    pcall(vim.cmd, 'tabclose')
+    close_session_tab()
     notify("landing complete; worktree cleaned up")
   end)
 
