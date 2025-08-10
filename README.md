@@ -32,6 +32,9 @@
 
 - 🎯 **Isolated Worktrees** - Each LLM session runs in its own Git worktree outside your repository
 - 🔄 **Auto-commit on Exit** - Changes are automatically committed when the session ends
+- 🪄 **Auto-finalize** - Closing the session tab or terminal prompts to land changes via Neogit (no need to run `:LLMEnd` manually)
+- 🧭 **Interactive Landing** - Cherry-pick onto base branch with Neogit, prefilled commit message, and interactive staging
+- 🥽 **Safe State Handling** - Auto-stash dirty base branch before landing and restore after commit; preserve `llm/...` branch for provenance
 - 🌳 **Branch Preservation** - Worktree is removed but branches remain for easy merging
 - 📑 **Tab-based Sessions** - Each session opens in a new Neovim tab with terminal
 - 🚀 **Concurrent Sessions** - Run multiple LLM agents simultaneously without conflicts
@@ -112,6 +115,11 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 
 " End session and optionally land on base branch via Neogit
 :LLMEnd
+
+Note: Closing the LLM session tab (or exiting its terminal) automatically triggers the same finalize flow as `:LLMEnd`:
+- You’ll be prompted to land onto the detected base branch
+- Neogit opens with the agent’s commit message prefilled
+- After committing, the session worktree is removed while the `llm/...` branch is preserved
 ```
 
 ### Workflow Example
@@ -130,8 +138,9 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 
 4. **On exit** (or `:LLMAbort`):
   - Auto-commits changes with message: `wip(llm-legion): claude/add-tests @ 2025-01-10T14:35:22Z [20250110-143022-5fa3c]`
-   - Removes worktree directory
-   - Preserves branch for review/merge
+  - Prompts to land onto base branch (detected from repo or configured)
+  - Opens Neogit with changes applied (no-commit) and the agent’s message prefilled
+  - After commit: removes the worktree; preserves `llm/...` branch
 
 5. **Review and merge**:
    ```bash
@@ -171,8 +180,8 @@ require("llm_legion").setup({
 
   -- v0.2.0 landing flow
   landing = {
-    base_branch = "main",    -- target branch to land on
-    auto_prompt = true,       -- ask to land when ending a session
+    -- base_branch = "main",  -- optional; if omitted, detected from origin/HEAD → main/master → current
+    auto_prompt = true,       -- ask to land when ending a session or when the terminal exits
   },
 })
 ```

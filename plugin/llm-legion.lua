@@ -37,3 +37,9 @@ end, {
   desc = "Cleanup abandoned worktrees and prune git metadata",
 })
 
+vim.api.nvim_create_user_command("LLMEnd", function()
+  local fin = require('llm_legion.finalize')
+  fin.end_session()
+end, {
+  desc = "End session and optionally land onto base via Neogit",
+})

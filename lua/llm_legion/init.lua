@@ -124,7 +124,7 @@ local function run(cmd, opts, cb)
 end
 
 local function run_blocking(cmd, opts)
-  if vim.system then
+  if vim.system and not vim.in_fast_event() then
     local proc = vim.system(cmd, { cwd = (opts or {}).cwd })
     local res = proc:wait()
     return res.code or 1, res.stdout or "", res.stderr or ""
@@ -254,6 +254,12 @@ local function git_commit_if_needed(sess)
 end
 
 local function git_remove_worktree(sess)
+  -- Ensure we are not inside the worktree when removing
+  local cur_cwd = vim.fn.getcwd()
+  if is_path_inside(cur_cwd, sess.worktree_path) then
+    local root = sess.repo_root or abspath(sess.worktree_path .. "/..")
+    pcall(vim.cmd, 'tcd ' .. vim.fn.fnameescape(root))
+  end
   -- Run removal from the repo root to avoid failures when CWD is the worktree
   local root = sess.repo_root or abspath(sess.worktree_path .. "/..")
   local rc, _o2, _e2 = exec_git({ "worktree", "remove", "--force", sess.worktree_path }, root)
@@ -274,30 +280,11 @@ local function open_session_tab(cfg, sess)
   local bufnr = vim.api.nvim_get_current_buf()
   -- run terminal
   local job = vim.fn.termopen(cmd, { cwd = sess.worktree_path, on_exit = function()
-    -- on exit: auto-commit changes then remove worktree
-    local function cleanup()
-      -- If process CWD is inside the worktree, leave it to allow deletion
-      local cur_cwd = vim.fn.getcwd()
-      if is_path_inside(cur_cwd, sess.worktree_path) then
-        pcall(vim.cmd, "tcd " .. vim.fn.fnameescape(sess.repo_root))
-      end
-      git_commit_if_needed(sess)
-      git_remove_worktree(sess)
-      -- Close buffers/windows
-      local wins = vim.api.nvim_tabpage_list_wins(tab)
-      if #wins == 1 then
-        local wbuf = vim.api.nvim_win_get_buf(wins[1])
-        if wbuf == bufnr then
-          pcall(vim.cmd, 'tabclose')
-        else
-          pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
-        end
-      else
-        pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
-      end
-      M._state.sessions_by_tab[tab] = nil
-    end
-    vim.schedule(cleanup)
+    -- On exit, trigger finalize flow which will prompt to land and cleanup
+    vim.schedule(function()
+      local finalize = require('llm_legion.finalize')
+      finalize.end_session()
+    end)
   end })
 
   if job <= 0 then
@@ -328,6 +315,8 @@ local function open_session_tab(cfg, sess)
     worktree_path = sess.worktree_path,
     branch = sess.branch,
     repo_root = sess.repo_root,
+    base_ref = sess.base_ref,
+    base_sha = sess.base_sha,
   }
 end
 
@@ -425,6 +414,11 @@ function M.session_cmd(args)
   end
 
   -- Open tab + terminal
+  local base_sha
+  do
+    local c_b, o_b, _e_b = exec_git({ 'rev-parse', base }, root)
+    if c_b == 0 then base_sha = vim.trim(o_b or '') end
+  end
   open_session_tab(M.config, {
     id = id,
     name = slug,
@@ -432,6 +426,8 @@ function M.session_cmd(args)
     worktree_path = p.worktree_path,
     branch = p.branch,
     repo_root = root,
+    base_ref = base,
+    base_sha = base_sha,
   })
 end
 
@@ -444,6 +440,8 @@ function M.abort_current()
     notify("no active session in this tab", vim.log.levels.WARN)
     return
   end
+  -- Mark to skip landing prompt and just cleanup
+  sess.abort = true
   if sess.term_job_id and sess.term_job_id > 0 then
     pcall(vim.fn.jobstop, sess.term_job_id)
   end
@@ -513,7 +511,12 @@ end
 M._test = {
   sanitize_slug = sanitize_slug,
   session_id = session_id,
-  is_path_inside = is_path_inside,
 }
+
+-- Public: end the current session with optional landing via Neogit
+function M.end_session()
+  local finalize = require('llm_legion.finalize')
+  return finalize.end_session()
+end
 
 return M

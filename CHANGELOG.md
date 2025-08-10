@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-08-10
+
+### Added
+- `:LLMEnd` to end a session and optionally land changes onto the base branch via Neogit (`git cherry-pick -n`).
+- Auto-finalize: closing the session tab/terminal triggers the same landing prompt automatically.
+- Prefilled commit message for landing via temporary `.git/LLM_EDITMSG` and `commit.template` override.
+- Safe stash/pop of dirty base branch before/after landing.
+- Base branch detection from `origin/HEAD`, falling back to `main`, `master`, or current branch.
+- Config option `landing = { base_branch, auto_prompt }`.
+
+### Fixed
+- Avoid calling blocking APIs in fast event contexts (timer) when watching for commit completion.
+- Ensure Neogit opens in the base repo’s cwd so staged changes appear correctly.
+
+### Docs
+- README and help updated for auto-finalize and Neogit landing flow.
+
 ## [0.1.1] - 2025-08-10
 
 ### Fixed
@@ -41,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Worktrees are always created outside the repository
 - Provider CLIs require external authentication
 
-[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.1.1...HEAD
+[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.2.0...HEAD
+[0.2.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.2.0
 [0.1.1]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.1
 [0.1.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.0

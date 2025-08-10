@@ -1,0 +1,11 @@
+WRN 2025-08-10T17:21:45.995 ?.3956831  server_start:193: Failed to start server: operation not permitted: /run/user/1000/llm-legion-tests.3956831.0
+WRN 2025-08-10T17:21:49.398 ?.3956874  server_start:193: Failed to start server: operation not permitted: /run/user/1000/llm-legion-tests.3956874.0
+WRN 2025-08-10T21:15:57.973 ?.3978486  server_start:193: Failed to start server: operation not permitted: /run/user/1000/llm-legion-tests.3978486.0
+WRN 2025-08-10T21:16:01.305 ?.3978555  server_start:193: Failed to start server: operation not permitted: /run/user/1000/llm-legion-tests.3978555.0
+WRN 2025-08-10T21:42:42.768 ?.3993174  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.3993174.0
+WRN 2025-08-10T21:46:59.730 ?.3996159  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.3996159.0
+WRN 2025-08-10T21:51:35.009 ?.3998757  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.3998757.0
+WRN 2025-08-10T21:52:38.691 ?.3999529  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.3999529.0
+WRN 2025-08-10T21:53:59.467 ?.4000287  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.4000287.0
+WRN 2025-08-10T21:56:50.250 ?.4001706  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.4001706.0
+WRN 2025-08-10T21:57:58.000 ?.4002390  server_start:193: Failed to start server: operation not permitted: /run/user/1000/nvim.4002390.0
