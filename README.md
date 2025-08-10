@@ -1,4 +1,12 @@
+<div align="center">
+
 # llm-legion.nvim
+
+<img src=".img/logo.png" alt="llm-legion logo" width="400">
+
+**Launch LLM coding agents in isolated Git worktrees**
+
+</div>
 
 > [!WARNING]
 > **⚠️ Unstable - Early Development**
@@ -8,8 +16,6 @@
 > please report any issues you find!
 
 <div align="center">
-
-**Launch LLM coding agents in isolated Git worktrees**
 
 [![Neovim](https://img.shields.io/badge/Neovim-0.10+-blueviolet.svg?style=flat-square&logo=Neovim&logoColor=white)](https://neovim.io)
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=flat-square&logo=lua)](http://www.lua.org)
@@ -49,9 +55,10 @@
   "cyphersnake/llm-legion.nvim",
   url = "https://codeberg.org/cyphersnake/llm-legion.nvim",
   dependencies = {
+    "NeogitOrg/neogit",      -- Required for interactive landing (:LLMEnd)
     "nvim-lua/plenary.nvim", -- Required for tests only
   },
-  cmd = { "LLMSession", "LLMAbort", "LLMCleanup" }, -- Load plugin when these commands are used
+  cmd = { "LLMSession", "LLMAbort", "LLMCleanup", "LLMEnd" }, -- Load plugin when these commands are used
   config = function()
     require("llm_legion").setup({
       -- your configuration
@@ -70,6 +77,9 @@
 ```lua
 use {
   "cyphersnake/llm-legion.nvim",
+  requires = {
+    { "NeogitOrg/neogit" },
+  },
   config = function()
     require("llm_legion").setup({})
   end
@@ -79,6 +89,7 @@ use {
 ### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
+Plug 'NeogitOrg/neogit'
 Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 ```
 
@@ -98,6 +109,9 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 
 " Clean up orphaned worktrees
 :LLMCleanup
+
+" End session and optionally land on base branch via Neogit
+:LLMEnd
 ```
 
 ### Workflow Example
@@ -154,6 +168,12 @@ require("llm_legion").setup({
       args = { "--yes-always" }
     },
   },
+
+  -- v0.2.0 landing flow
+  landing = {
+    base_branch = "main",    -- target branch to land on
+    auto_prompt = true,       -- ask to land when ending a session
+  },
 })
 ```
 
@@ -189,6 +209,7 @@ worktrees_prefix = "ai-sandbox",
 
 - **Neovim** ≥ 0.10
 - **Git** with worktree support
+- **Neogit** for interactive landing via `:LLMEnd`
 - **LLM CLI tools** installed and authenticated:
   - [Claude CLI](https://docs.anthropic.com/claude/docs/claude-cli)
   - [Codex](https://github.com/microsoft/codex)
