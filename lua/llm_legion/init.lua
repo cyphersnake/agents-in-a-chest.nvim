@@ -12,6 +12,19 @@ local DEFAULTS = {
     claude = { cmd = "claude", args = {} },
     codex = { cmd = "codex", args = {} },
   },
+  -- Rust-specific behavior
+  rust = {
+    -- When true, and a Rust project is detected, set CARGO_TARGET_DIR
+    -- for the provider terminal to point at the repository root's
+    -- target directory so all worktrees share a single cache.
+    share_target_dir = true,
+    -- Optional override. If nil, uses <repo_root>/target
+    target_dir = nil,
+    -- Env var name to export. Defaults to Cargo's standard.
+    env_name = "CARGO_TARGET_DIR",
+    -- Detect Rust project by presence of top-level markers (Cargo.toml, rust-toolchain(.toml))
+    detect = true,
+  },
 }
 
 -- Internal state registry
@@ -191,6 +204,20 @@ local function repo_root()
   return vim.trim(out), nil
 end
 
+local function file_exists(path)
+  local st = vim.loop.fs_stat(path)
+  return st ~= nil and st.type == 'file'
+end
+
+local function is_rust_project(root)
+  -- Simple detection by common top-level files
+  if not root or root == '' then return false end
+  if file_exists(root .. "/Cargo.toml") then return true end
+  if file_exists(root .. "/rust-toolchain") then return true end
+  if file_exists(root .. "/rust-toolchain.toml") then return true end
+  return false
+end
+
 -- Compute all naming and paths for session
 local function compute_paths(repo_root_path, provider, slug, id, cfg)
   local real_root = vim.loop.fs_realpath(repo_root_path) or repo_root_path
@@ -279,13 +306,17 @@ local function open_session_tab(cfg, sess)
 
   local bufnr = vim.api.nvim_get_current_buf()
   -- run terminal
-  local job = vim.fn.termopen(cmd, { cwd = sess.worktree_path, on_exit = function()
+  local job = vim.fn.termopen(cmd, {
+    cwd = sess.worktree_path,
+    env = sess.env,
+    on_exit = function()
     -- On exit, trigger finalize flow which will prompt to land and cleanup
     vim.schedule(function()
       local finalize = require('llm_legion.finalize')
       finalize.end_session()
     end)
-  end })
+    end
+  })
 
   if job <= 0 then
     -- Terminal failed to start; rollback worktree immediately
@@ -424,6 +455,30 @@ function M.session_cmd(args)
     local c_b, o_b, _e_b = exec_git({ 'rev-parse', base }, root)
     if c_b == 0 then base_sha = vim.trim(o_b or '') end
   end
+  -- Build environment for the provider terminal
+  local env = {}
+  -- Merge any env provided at provider level
+  do
+    local pconf = M.config.providers[provider] or {}
+    if type(pconf.env) == 'table' then
+      for k, v in pairs(pconf.env) do env[k] = v end
+    end
+  end
+  -- Rust: share target dir across worktrees if enabled and detected
+  do
+    local rcfg = (M.config.rust or {})
+    if rcfg.share_target_dir ~= false then
+      local rusty = (rcfg.detect == false) and true or is_rust_project(root)
+      if rusty then
+        local target_dir = rcfg.target_dir or (root .. "/target")
+        -- best-effort ensure directory exists so downstream tools can probe
+        ensure_dir(target_dir)
+        local name = rcfg.env_name or "CARGO_TARGET_DIR"
+        env[name] = target_dir
+      end
+    end
+  end
+
   open_session_tab(M.config, {
     id = id,
     name = slug,
@@ -433,6 +488,7 @@ function M.session_cmd(args)
     repo_root = root,
     base_ref = base,
     base_sha = base_sha,
+    env = env,
   })
 end
 
@@ -516,6 +572,8 @@ end
 M._test = {
   sanitize_slug = sanitize_slug,
   session_id = session_id,
+  is_path_inside = is_path_inside,
+  is_rust_project = is_rust_project,
 }
 
 -- Public: end the current session with optional landing via Neogit

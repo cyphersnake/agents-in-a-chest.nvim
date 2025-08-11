@@ -105,6 +105,22 @@ providers                               *llm-legion.providers*
     - `cmd`: Command to execute
     - `args`: Optional arguments array
 
+Rust projects                            *llm-legion.rust*
+    Options for Rust/Cargo repositories. When enabled, sessions launched
+    inside a Rust project export `CARGO_TARGET_DIR` so all worktrees share
+    a single target directory at the repository root. This avoids repeated
+    target rebuilds across Git worktrees and saves disk space: >
+        rust = {
+          share_target_dir = true,      -- default: true
+          target_dir = nil,             -- default: <repo_root>/target
+          env_name = "CARGO_TARGET_DIR",-- override env var name if needed
+          detect = true,                -- detect via Cargo.toml or rust-toolchain*
+        }
+<
+    Detection checks for `Cargo.toml`, `rust-toolchain`, or
+    `rust-toolchain.toml` in the repository root. If `detect = false`, the
+    target env is exported unconditionally for sessions in any repository.
+
 Example configuration: >
     require('llm_legion').setup({
         worktrees_prefix = "ai",
@@ -118,6 +134,10 @@ Example configuration: >
                 cmd = "aider",
                 args = { "--yes-always" }
             }
+        },
+        rust = {
+          share_target_dir = true,
+          -- target_dir = "/path/to/shared/target", -- optional override
         }
     })
 <

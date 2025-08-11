@@ -36,6 +36,7 @@ A focused flow: create a few agents, close them, then cherry-pick their work bac
 - 🧭 **Cherry-pick landing**: use Neogit to land changes onto your base branch
 - 🌳 **Branch provenance**: `llm/...` branches are preserved for review/audits
 - 🧹 **Smart cleanup**: worktrees are cleaned; base branch is auto-stashed/restored if dirty
+- 🦀 **Rust smart cache**: optionally share a single Cargo `target/` at repo root across all sessions
 
 ## 🎬 Demo
 
@@ -156,6 +157,14 @@ require("llm_legion").setup({
   landing = {
     -- base_branch = "main",  -- optional; if omitted, detected from origin/HEAD → main/master → current
     auto_prompt = true,       -- ask to land when ending a session or when the terminal exits
+  },
+
+  -- Rust projects: share Cargo target across worktrees
+  rust = {
+    share_target_dir = true,   -- export CARGO_TARGET_DIR for Rust repos
+    -- target_dir = "/path/to/shared/target", -- default: <repo>/target
+    -- env_name = "CARGO_TARGET_DIR",        -- override if needed
+    -- detect = true,                         -- detect Cargo.toml/rust-toolchain*
   },
 })
 ```

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-08-11
+
+### Added
+- Rust: optionally export `CARGO_TARGET_DIR` for sessions in Cargo projects so all Git worktrees share a single `target/` at the repo root. Controlled via `rust = { share_target_dir = true, target_dir = nil, env_name = "CARGO_TARGET_DIR", detect = true }`.
+
+### Docs
+- README and help updated with Rust project configuration.
+
 ## [0.2.0] - 2025-08-10
 
 ### Added
@@ -58,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Worktrees are always created outside the repository
 - Provider CLIs require external authentication
 
-[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.2.0...HEAD
+[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.3.0...HEAD
+[0.3.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.3.0
 [0.2.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.2.0
 [0.1.1]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.1
 [0.1.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.0
