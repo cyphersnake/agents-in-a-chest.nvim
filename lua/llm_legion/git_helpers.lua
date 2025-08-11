@@ -2,8 +2,15 @@ local G = {}
 
 local function run_blocking(cmd, opts)
   -- Avoid vim.system():wait() when in fast event contexts (e.g., timers)
+  local cwd = (opts or {}).cwd
+  if cwd and cwd ~= '' then
+    local st = vim.loop.fs_stat(cwd)
+    if not (st and st.type == 'directory') then
+      return 1, "", string.format("ENOENT: cwd not found: %s", tostring(cwd))
+    end
+  end
   if vim.system and not vim.in_fast_event() then
-    local proc = vim.system(cmd, { cwd = (opts or {}).cwd })
+    local proc = vim.system(cmd, { cwd = cwd })
     local res = proc:wait()
     return res.code or 1, res.stdout or "", res.stderr or ""
   else

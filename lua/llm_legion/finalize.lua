@@ -93,9 +93,12 @@ local function remove_worktree(sess)
   if is_inside(cwd, sess.worktree_path) then
     pcall(vim.cmd, 'tcd ' .. vim.fn.fnameescape(root))
   end
-  local rc, _o2, _e2 = G.exec_git({ "worktree", "remove", "--force", sess.worktree_path }, root)
-  if rc ~= 0 then
-    notify("git worktree remove failed for '" .. sess.worktree_path .. "'", vim.log.levels.WARN)
+  -- If repo root is gone, skip git and just remove directories.
+  if dir_exists(root) then
+    local rc, _o2, _e2 = G.exec_git({ "worktree", "remove", "--force", sess.worktree_path }, root)
+    if rc ~= 0 then
+      notify("git worktree remove failed for '" .. sess.worktree_path .. "'", vim.log.levels.WARN)
+    end
   end
   -- If the directory still exists, delete it and prune empty parents (two levels)
   if dir_exists(sess.worktree_path) then
@@ -149,6 +152,13 @@ local function start_commit_watcher(repo_root, prev_head, on_commit)
     -- Run git check on main loop to avoid fast-event blocking
     vim.schedule(function()
       if stopped then return end
+      -- If repo root disappears (e.g., ephemeral worktree or deleted repo), stop quietly.
+      if not dir_exists(repo_root) then
+        stopped = true
+        timer:stop(); timer:close()
+        notify("landing watcher stopped: repo directory missing", vim.log.levels.WARN)
+        return
+      end
       local head = (G.rev_parse("HEAD", repo_root))
       if head and head ~= prev_head then
         stopped = true
@@ -213,7 +223,11 @@ function M.end_session(sess)
   git_commit_if_needed(cur_sess)
   local sha, _e = G.rev_parse("HEAD", cur_sess.worktree_path)
   if not sha then
-    notify("failed to resolve session commit SHA", vim.log.levels.ERROR)
+    notify("failed to resolve session commit SHA; cleaning up", vim.log.levels.ERROR)
+    -- Best-effort cleanup so we don't leave timers or tabs lingering
+    remove_worktree(cur_sess)
+    core._state.sessions_by_tab[cur_sess.tab] = nil
+    close_session_tab()
     return
   end
   local msg, _e2 = G.get_commit_message(sha, cur_sess.worktree_path)
