@@ -126,23 +126,8 @@ local function prompt_yes_no(target_branch)
   return ans == 1
 end
 
-local function configure_commit_template(repo_root, message)
-  local edit_path = repo_root .. "/.git/LLM_EDITMSG"
-  file_write(edit_path, message .. "\n")
-  local _c1, old, _e1 = G.exec_git({ "config", "--local", "--get", "commit.template" }, repo_root)
-  old = vim.trim(old or "")
-  G.exec_git({ "config", "--local", "commit.template", ".git/LLM_EDITMSG" }, repo_root)
-  return edit_path, (old ~= "" and old or nil)
-end
-
-local function restore_commit_template(repo_root, old_template, edit_path)
-  if old_template then
-    G.exec_git({ "config", "--local", "commit.template", old_template }, repo_root)
-  else
-    G.exec_git({ "config", "--local", "--unset", "commit.template" }, repo_root)
-  end
-  if edit_path then file_remove(edit_path) end
-end
+-- Commit message prefill helper using Neogit/commit buffer hooks
+local CT = require('llm_legion.commit_template')
 
 local function start_commit_watcher(repo_root, prev_head, on_commit)
   local timer = vim.loop.new_timer()
@@ -310,22 +295,21 @@ function M.end_session(sess)
   -- Ensure Neovim tab-local cwd points at the base repo for Neogit
   pcall(vim.cmd, 'tcd ' .. vim.fn.fnameescape(repo))
 
-  local edit_path, old_template = configure_commit_template(repo, msg)
   local pre_head = G.rev_parse("HEAD", repo)
 
   -- Open Neogit and watch for commit to complete cleanup
   local ok, err = open_neogit()
   if not ok then
     notify(err or "failed to open Neogit", vim.log.levels.ERROR)
-    -- attempt to restore template and stash; leave working tree dirty with applied changes
-    restore_commit_template(repo, old_template, edit_path)
+    -- leave working tree dirty with applied changes
     if stashed then G.stash_pop_safe(repo) end
     return
   end
 
+  -- Prefill the next commit message in the commit editor buffer (no git config changes)
+  CT.schedule(repo, msg)
+
   local stop_watch = start_commit_watcher(repo, pre_head, function()
-    -- restore git config and edit file
-    restore_commit_template(repo, old_template, edit_path)
     if stashed then G.stash_pop_safe(repo) end
     -- remove worktree and close tab
     remove_worktree(cur_sess)
@@ -338,8 +322,6 @@ function M.end_session(sess)
   vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
     once = true,
     callback = function()
-      -- Best-effort cleanup to avoid leaving repo with a dangling commit.template
-      restore_commit_template(repo, old_template, edit_path)
       stop_watch()
     end,
   })
