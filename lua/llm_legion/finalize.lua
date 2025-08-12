@@ -338,6 +338,8 @@ function M.end_session(sess)
   vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
     once = true,
     callback = function()
+      -- Best-effort cleanup to avoid leaving repo with a dangling commit.template
+      restore_commit_template(repo, old_template, edit_path)
       stop_watch()
     end,
   })
