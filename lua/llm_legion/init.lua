@@ -449,6 +449,29 @@ function M.session_cmd(args)
     return
   end
 
+  -- Copy AGENTS.md and CLAUDE.md files to worktree if they exist but are NOT tracked by git
+  do
+    local files_to_copy = { "AGENTS.md", "CLAUDE.md" }
+    for _, filename in ipairs(files_to_copy) do
+      local src_path = root .. "/" .. filename
+      local dst_path = p.worktree_path .. "/" .. filename
+      if file_exists(src_path) then
+        -- Check if file is tracked by git
+        local tracked_code, _, _ = exec_git({ "ls-files", "--error-unmatch", filename }, root)
+        if tracked_code ~= 0 then
+          -- File exists but is not tracked by git, so copy it
+          local ok, content = pcall(vim.fn.readfile, src_path, "b")
+          if ok and content then
+            local write_ok = pcall(vim.fn.writefile, content, dst_path, "b")
+            if not write_ok then
+              notify("Failed to copy " .. filename .. " to worktree", vim.log.levels.WARN)
+            end
+          end
+        end
+      end
+    end
+  end
+
   -- Open tab + terminal
   local base_sha
   do
