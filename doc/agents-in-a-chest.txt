@@ -1,99 +1,99 @@
-*llm-legion.txt*  Launch LLM coding agents in isolated Git worktrees
+*agents-in-a-chest.txt*  Launch LLM coding agents in isolated Git worktrees
 
 Author:  cyphersnake
 License: MIT
-Repo:    https://codeberg.org/cyphersnake/llm-legion.nvim
+Repo:    https://codeberg.org/cyphersnake/agents-in-a-chest.nvim
 
-INTRODUCTION                                    *llm-legion*
+INTRODUCTION                                    *agents-in-a-chest*
 
-llm-legion.nvim provides isolated Git worktree environments for LLM coding
+agents-in-a-chest.nvim provides isolated Git worktree environments for LLM coding
 agents. Each session runs in its own worktree outside your repository, with
 automatic commit and cleanup on exit.
 
-QUICK FLOW                                      *llm-legion-flow*
+QUICK FLOW                                      *agents-in-a-chest-flow*
 
 1. Start a few agents: >
-    :LLMSession claude --name refactor-auth
-    :LLMSession codex  --name add-tests --base develop
+    :AICSession claude --name refactor-auth
+    :AICSession codex  --name add-tests --base develop
 <
 2. Work in each agent's tab (isolated worktrees).
 3. Close each tab when finished. On close: auto-commit, then prompt to land
    via Neogit using cherry-pick -n with a prefilled message.
-4. Complete the Neogit commit. The worktree is removed; the `llm/...` branch
+4. Complete the Neogit commit. The worktree is removed; the `aic/...` branch
    is preserved for provenance or later merging.
 
-CONTENTS                                        *llm-legion-contents*
+CONTENTS                                        *agents-in-a-chest-contents*
 
-1. Commands.................................|llm-legion-commands|
-2. Configuration............................|llm-legion-config|
-3. Functions................................|llm-legion-functions|
-4. Mappings.................................|llm-legion-mappings|
+1. Commands.................................|agents-in-a-chest-commands|
+2. Configuration............................|agents-in-a-chest-config|
+3. Functions................................|agents-in-a-chest-functions|
+4. Mappings.................................|agents-in-a-chest-mappings|
 
 ==============================================================================
-COMMANDS                                        *llm-legion-commands*
+COMMANDS                                        *agents-in-a-chest-commands*
 
-                                                *:LLMSession*
-:LLMSession {provider} --name {slug} [--base {ref}]
-    Start a new LLM session with the specified provider.
+                                                *:AICSession*
+:AICSession {provider} --name {slug} [--base {ref}]
+    Start a new AIC session with the specified provider.
     
     {provider}  Name of configured provider (e.g., 'claude', 'codex')
     {slug}      Human-readable name for the session (sanitized to [a-z0-9._-]+)
     {ref}       Optional Git ref to base worktree on (default: HEAD)
     
     Example: >
-        :LLMSession claude --name refactor-auth --base develop
+        :AICSession claude --name refactor-auth --base develop
 <
-                                                *:LLMAbort*
-:LLMAbort
-    Abort the LLM session in the current tab. Triggers auto-commit and
+                                                *:AICAbort*
+:AICAbort
+    Abort the AIC session in the current tab. Triggers auto-commit and
     cleanup of the worktree.
 
-                                                *:LLMCleanup*
-:LLMCleanup
+                                                *:AICCleanup*
+:AICCleanup
     Clean up orphaned worktree directories and prune Git metadata.
     Safe to run anytime.
 
-                                               *:LLMEnd*
-:LLMEnd
-    End the current LLM session. If uncommitted changes exist in the
+                                               *:AICEnd*
+:AICEnd
+    End the current AIC session. If uncommitted changes exist in the
     session worktree, they are auto-committed first. Then, optionally
     land those changes onto the base branch via an interactive Neogit
     flow using `git cherry-pick -n` and a prefilled commit message.
-    The worktree is removed after commit; the llm/... branch remains.
+    The worktree is removed after commit; the aic/... branch remains.
     
     Note: This finalize flow also runs automatically when the session
-    terminal exits or the tab is closed. `:LLMEnd` is optional and
+    terminal exits or the tab is closed. `:AICEnd` is optional and
     provided in case you want to trigger it explicitly.
 
 ==============================================================================
-CONFIGURATION                                   *llm-legion-config*
+CONFIGURATION                                   *agents-in-a-chest-config*
 
 Setup function: >
-    require('llm_legion').setup({
+    require('agents_in_a_chest').setup({
         -- options
     })
 <
 Options:
 
-worktrees_root                          *llm-legion.worktrees_root*
+worktrees_root                          *agents-in-a-chest.worktrees_root*
     Type: `string|nil`
     Default: `nil` (auto-computed as <repo_parent>/.<repo_name>-worktrees)
     
     Custom location for worktree directories.
 
-worktrees_prefix                        *llm-legion.worktrees_prefix*
+worktrees_prefix                        *agents-in-a-chest.worktrees_prefix*
     Type: `string|nil`
     Default: `nil` (uses repository name)
     
     Custom prefix for worktree directory names.
 
-default_base                            *llm-legion.default_base*
+default_base                            *agents-in-a-chest.default_base*
     Type: `string`
     Default: `"HEAD"`
     
     Default Git ref for new worktrees.
 
-providers                               *llm-legion.providers*
+providers                               *agents-in-a-chest.providers*
     Type: `table`
     Default: >
         {
@@ -105,7 +105,7 @@ providers                               *llm-legion.providers*
     - `cmd`: Command to execute
     - `args`: Optional arguments array
 
-Rust projects                            *llm-legion.rust*
+Rust projects                            *agents-in-a-chest.rust*
     Options for Rust/Cargo repositories. When enabled, sessions launched
     inside a Rust project export `CARGO_TARGET_DIR` so all worktrees share
     a single target directory at the repository root. This avoids repeated
@@ -122,7 +122,7 @@ Rust projects                            *llm-legion.rust*
     target env is exported unconditionally for sessions in any repository.
 
 Example configuration: >
-    require('llm_legion').setup({
+    require('agents_in_a_chest').setup({
         worktrees_prefix = "ai",
         default_base = "main",
         providers = {
@@ -142,48 +142,48 @@ Example configuration: >
     })
 <
 
-Landing (v0.2.0)                          *llm-legion.landing*
+Landing (v0.2.0)                          *agents-in-a-chest.landing*
     Options controlling the end-of-session landing flow: >
         landing = {
           base_branch = "main",   -- target branch to land onto
-          auto_prompt = true,      -- ask to land on :LLMEnd
+          auto_prompt = true,      -- ask to land on :AICEnd
         }
 <
     Notes: ~
       - If `base_branch` is nil, the plugin detects a default branch via
         `origin/HEAD`, falling back to `main`, `master`, or the current.
-      - The landing flow requires Neogit. If not installed, :LLMEnd errs.
+      - The landing flow requires Neogit. If not installed, :AICEnd errs.
       - Closing the LLM tab (or exiting its terminal) triggers landing
         automatically if `auto_prompt` is enabled (default: true).
 ==============================================================================
-FUNCTIONS                                       *llm-legion-functions*
+FUNCTIONS                                       *agents-in-a-chest-functions*
 
-setup({config})                                 *llm_legion.setup()*
+setup({config})                                 *agents_in_a_chest.setup()*
     Initialize the plugin with given configuration.
     
     Parameters: ~
         {config}  Optional configuration table
 
-session_cmd({args})                             *llm_legion.session_cmd()*
-    Internal function called by :LLMSession command.
+session_cmd({args})                             *agents_in_a_chest.session_cmd()*
+    Internal function called by :AICSession command.
     
     Parameters: ~
         {args}  Array of command arguments
 
-abort_current()                                 *llm_legion.abort_current()*
-    Abort session in current tab. Called by :LLMAbort.
+abort_current()                                 *agents_in_a_chest.abort_current()*
+    Abort session in current tab. Called by :AICAbort.
 
-cleanup()                                       *llm_legion.cleanup()*
-    Clean up orphaned worktrees. Called by :LLMCleanup.
+cleanup()                                       *agents_in_a_chest.cleanup()*
+    Clean up orphaned worktrees. Called by :AICCleanup.
 
 ==============================================================================
-MAPPINGS                                        *llm-legion-mappings*
+MAPPINGS                                        *agents-in-a-chest-mappings*
 
 No default mappings are provided. Example mappings: >
-    vim.keymap.set("n", "<leader>lc", ":LLMSession claude --name refactor<CR>")
-    vim.keymap.set("n", "<leader>lx", ":LLMSession codex --name tests<CR>")
-    vim.keymap.set("n", "<leader>le", ":LLMEnd<CR>")       -- optional, closing the tab also ends
-    vim.keymap.set("n", "<leader>la", ":LLMAbort<CR>")
+    vim.keymap.set("n", "<leader>lc", ":AICSession claude --name refactor<CR>")
+    vim.keymap.set("n", "<leader>lx", ":AICSession codex --name tests<CR>")
+    vim.keymap.set("n", "<leader>le", ":AICEnd<CR>")       -- optional, closing the tab also ends
+    vim.keymap.set("n", "<leader>la", ":AICAbort<CR>")
 <
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

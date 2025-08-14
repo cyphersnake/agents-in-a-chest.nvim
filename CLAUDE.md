@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Neovim plugin called `llm-legion` (formerly planned as `llm-worktree.nvim`) that launches LLM coding agents in isolated Git worktrees. The plugin creates temporary worktrees outside the main working tree, runs the agent in a terminal tab, and automatically commits changes when the session ends.
+This is a Neovim plugin called `agents-in-a-chest` (formerly planned as `llm-worktree.nvim`) that launches LLM coding agents in isolated Git worktrees. The plugin creates temporary worktrees outside the main working tree, runs the agent in a terminal tab, and automatically commits changes when the session ends.
 
 ## Build and Development Commands
 
@@ -14,21 +14,21 @@ This is a Neovim plugin called `llm-legion` (formerly planned as `llm-worktree.n
   ```
   nvim --headless -c "PlenaryBustedDirectory tests/ { minimal_init = 'tests/minimal.vim' }" -c qa
   ```
-- **Local development**: Launch nvim in repo, then `:set rtp+=.` and `:lua require('llm_legion').setup({})`
+- **Local development**: Launch nvim in repo, then `:set rtp+=.` and `:lua require('agents_in_a_chest').setup({})`
 
 ## Architecture and Core Concepts
 
 ### Module Structure
-- **Entry point**: `plugin/llm-legion.lua` (autoload/entry)
-- **Core modules**: `lua/llm_legion/**/*.lua`
-- **Main module**: `lua/llm_legion/init.lua` (implements setup and core lifecycle)
-- **Public API**: `require('llm_legion').setup({})` and feature methods
+- **Entry point**: `plugin/agents-in-a-chest.lua` (autoload/entry)
+- **Core modules**: `lua/agents_in_a_chest/**/*.lua`
+- **Main module**: `lua/agents_in_a_chest/init.lua` (implements setup and core lifecycle)
+- **Public API**: `require('agents_in_a_chest').setup({})` and feature methods
 
 ### Key Implementation Details
 
 1. **Worktree Management**:
    - Creates worktrees at `<repo_parent>/.<repo>-worktrees/<repo_key>/<session_suffix>`
-   - Branch naming: `llm/<provider>/<SessionID>-<slug>`
+   - Branch naming: `aic/<provider>/<SessionID>-<slug>`
    - Uses JIT (Just-In-Time) policy: add → run → commit → remove
 
 2. **Session Lifecycle**:
@@ -43,9 +43,9 @@ This is a Neovim plugin called `llm-legion` (formerly planned as `llm-worktree.n
 
 ### Commands to Implement
 
-- `:LLMSession {provider} --name <slug> [--base <ref>]` - Main command to start session
-- `:LLMAbort` - Force close current tab's terminal and cleanup
-- `:LLMCleanup` - Prune stray session directories
+- `:AICSession {provider} --name <slug> [--base <ref>]` - Main command to start session
+- `:AICAbort` - Force close current tab's terminal and cleanup
+- `:AICCleanup` - Prune stray session directories
 
 ## Testing Guidelines
 
@@ -62,7 +62,7 @@ This is a Neovim plugin called `llm-legion` (formerly planned as `llm-worktree.n
 - **Indentation**: 2 spaces, UTF-8, max line ~100 chars
 - **File naming**: `snake_case.lua`
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`)
-- **Error handling**: Use `vim.notify` with `[llm-legion]` prefix
+- **Error handling**: Use `vim.notify` with `[agents-in-a-chest]` prefix
 - **Async operations**: Use `vim.system` for Git calls, avoid blocking main loop
 
 ## Security Considerations

@@ -1,7 +1,7 @@
 -- Minimal, isolated init to run only this plugin + Neogit with Lazy
 
 -- Keep your main config untouched by using NVIM_APPNAME when launching:
---   NVIM_APPNAME=llm-legion-qa nvim -u examples/qa_init.lua
+--   NVIM_APPNAME=agents-in-a-chest-qa nvim -u examples/qa_init.lua
 
 -- Bootstrap lazy.nvim into this isolated profile
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
@@ -36,9 +36,9 @@ require('lazy').setup({
   },
   {
     dir = plugin_root,
-    name = 'llm-legion.nvim',
+    name = 'agents-in-a-chest.nvim',
     config = function()
-      require('llm_legion').setup({
+      require('agents_in_a_chest').setup({
         landing = { auto_prompt = true }, -- base branch auto-detected (origin/HEAD → main/master → current)
       })
     end,
@@ -49,12 +49,12 @@ require('lazy').setup({
 })
 
 -- Handy mappings for quick QA
-vim.keymap.set('n', '<leader>ls', ":LLMSession claude --name qa<CR>", { desc = 'Start LLM session' })
-vim.keymap.set('n', '<leader>le', ":LLMEnd<CR>", { desc = 'End session (land via Neogit)' })
-vim.keymap.set('n', '<leader>la', ":LLMAbort<CR>", { desc = 'Abort session' })
-vim.keymap.set('n', '<leader>lc', ":LLMCleanup<CR>", { desc = 'Cleanup worktrees' })
+vim.keymap.set('n', '<leader>ls', ":AICSession claude --name qa<CR>", { desc = 'Start AIC session' })
+vim.keymap.set('n', '<leader>le', ":AICEnd<CR>", { desc = 'End session (land via Neogit)' })
+vim.keymap.set('n', '<leader>la', ":AICAbort<CR>", { desc = 'Abort session' })
+vim.keymap.set('n', '<leader>lc', ":AICCleanup<CR>", { desc = 'Cleanup worktrees' })
 
 -- Print a small banner so it’s obvious we’re in QA profile
 vim.schedule(function()
-  vim.notify('[llm-legion QA] Lazy profile active. Use :LLMSession / :LLMEnd', vim.log.levels.INFO)
+  vim.notify('[agents-in-a-chest QA] Lazy profile active. Use :AICSession / :AICEnd', vim.log.levels.INFO)
 end)

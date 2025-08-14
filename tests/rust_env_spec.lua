@@ -20,7 +20,7 @@ describe('rust env', function()
   it('detects rust project via Cargo.toml', function()
     local dir = tmpdir()
     vim.fn.writefile({ '[package]', 'name = "demo"', 'version = "0.1.0"' }, dir .. '/Cargo.toml')
-    local m = require('llm_legion')
+    local m = require('agents_in_a_chest')
     eq(true, m._test.is_rust_project(dir))
   end)
 
@@ -46,7 +46,7 @@ describe('rust env', function()
 
     local out_file = dir .. '/.env_cargo_target_dir'
     -- configure plugin with provider that writes env var to repo root and exits
-    local m = require('llm_legion')
+    local m = require('agents_in_a_chest')
     m.setup({
       providers = {
         claude = { cmd = 'sh', args = { '-c', 'printf "%s" "$CARGO_TARGET_DIR" > "$OUT"' }, env = { OUT = out_file } },

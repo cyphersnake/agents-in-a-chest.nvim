@@ -1,8 +1,8 @@
-local G = require('llm_legion.git_helpers')
+local G = require('agents_in_a_chest.git_helpers')
 
 local M = {}
 
-local PREFIX = "[llm-legion] "
+local PREFIX = "[agents-in-a-chest] "
 local function notify(msg, level)
   vim.notify(PREFIX .. msg, level or vim.log.levels.INFO)
 end
@@ -36,7 +36,7 @@ end
 local function git_commit_if_needed(sess)
   G.exec_git({ "add", "-A" }, sess.worktree_path)
   local msg = string.format(
-    "wip(llm-legion): %s/%s @ %s [%s]",
+    "wip(agents-in-a-chest): %s/%s @ %s [%s]",
     sess.provider, sess.name, os.date("!%Y-%m-%dT%H:%M:%SZ"), sess.id
   )
   local c, _o, e = G.exec_git({ "commit", "-m", msg }, sess.worktree_path)
@@ -127,7 +127,7 @@ local function prompt_yes_no(target_branch)
 end
 
 -- Commit message prefill helper using Neogit/commit buffer hooks
-local CT = require('llm_legion.commit_template')
+local CT = require('agents_in_a_chest.commit_template')
 
 local function start_commit_watcher(repo_root, prev_head, on_commit)
   local timer = vim.loop.new_timer()
@@ -183,7 +183,7 @@ local function resolve_base_branch(core, sess)
 end
 
 function M.end_session(sess)
-  local core = require('llm_legion')
+  local core = require('agents_in_a_chest')
   core._ensure_setup()
   local tab = vim.api.nvim_get_current_tabpage()
   local cur_sess = sess or core._state.sessions_by_tab[tab]

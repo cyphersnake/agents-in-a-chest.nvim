@@ -1,6 +1,6 @@
-# Contributing to llm-legion.nvim
+# Contributing to agents-in-a-chest.nvim
 
-First off, thank you for considering contributing to llm-legion.nvim! 
+First off, thank you for considering contributing to agents-in-a-chest.nvim! 
 
 ## Code of Conduct
 
@@ -41,8 +41,8 @@ Enhancement suggestions are tracked as GitHub issues. Provide:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/llm-legion.nvim
-cd llm-legion.nvim
+git clone https://github.com/yourusername/agents-in-a-chest.nvim
+cd agents-in-a-chest.nvim
 
 # Install test dependencies
 git clone https://github.com/nvim-lua/plenary.nvim tests/vendor/plenary.nvim

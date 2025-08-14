@@ -1,7 +1,7 @@
 local M = {}
 
 -- Prefix for all user-facing messages
-local PREFIX = "[llm-legion] "
+local PREFIX = "[agents-in-a-chest] "
 
 -- Default configuration
 local DEFAULTS = {
@@ -227,7 +227,7 @@ local function compute_paths(repo_root_path, provider, slug, id, cfg)
   local key = string.format("%s-%s", basename(real_root), short_hash(real_root))
   local suffix = string.format("%s-%s", id, slug)
   local worktree_path = string.format("%s/%s/%s", worktrees_root, key, suffix)
-  local branch = string.format("llm/%s/%s", provider, suffix)
+  local branch = string.format("aic/%s/%s", provider, suffix)
   return {
     worktrees_root = worktrees_root,
     repo_key = key,
@@ -249,7 +249,7 @@ local function ensure_vimleave_autocmd()
             -- stage/commit from within the worktree
             exec_git({ "add", "-A" }, wcwd)
             exec_git({ "commit", "-m", string.format(
-              "wip(llm-legion): %s/%s @ %s [%s]",
+              "wip(agents-in-a-chest): %s/%s @ %s [%s]",
               sess.provider, sess.name, iso8601_utc(), sess.id
             ) }, wcwd)
             -- Leave worktree as process CWD before removal to avoid rmdir issues
@@ -268,7 +268,7 @@ end
 local function git_commit_if_needed(sess)
   exec_git({ "add", "-A" }, sess.worktree_path)
   local msg = string.format(
-    "wip(llm-legion): %s/%s @ %s [%s]",
+    "wip(agents-in-a-chest): %s/%s @ %s [%s]",
     sess.provider, sess.name, iso8601_utc(), sess.id
   )
   local c, _o, e = exec_git({ "commit", "-m", msg }, sess.worktree_path)
@@ -312,7 +312,7 @@ local function open_session_tab(cfg, sess)
     on_exit = function()
     -- On exit, trigger finalize flow which will prompt to land and cleanup
     vim.schedule(function()
-      local finalize = require('llm_legion.finalize')
+      local finalize = require('agents_in_a_chest.finalize')
       finalize.end_session()
     end)
     end
@@ -338,7 +338,7 @@ local function open_session_tab(cfg, sess)
   pcall(function()
     local tabnr = vim.api.nvim_tabpage_get_number(tab)
     vim.t[tabnr] = vim.t[tabnr] or {}
-    vim.t[tabnr].title = string.format("llm:%s:%s", sess.provider, sess.name)
+    vim.t[tabnr].title = string.format("aic:%s:%s", sess.provider, sess.name)
   end)
 
   M._state.sessions_by_tab[tab] = {
@@ -361,7 +361,7 @@ function M.session_cmd(args)
   M._ensure_setup()
   if not nvim_ok() then return end
   if not args or #args == 0 then
-    notify("usage: :LLMSession {provider} --name <slug> [--base <ref>]", vim.log.levels.WARN)
+    notify("usage: :AICSession {provider} --name <slug> [--base <ref>]", vim.log.levels.WARN)
     return
   end
   ensure_vimleave_autocmd()
@@ -576,7 +576,7 @@ function M.cleanup()
   notify("cleanup completed")
 end
 
--- Public helper for completion of :LLMSession provider
+-- Public helper for completion of :AICSession provider
 function M.complete_session(arglead)
   local items = provider_names()
   if not arglead or arglead == "" then
@@ -601,7 +601,7 @@ M._test = {
 
 -- Public: end the current session with optional landing via Neogit
 function M.end_session()
-  local finalize = require('llm_legion.finalize')
+  local finalize = require('agents_in_a_chest.finalize')
   return finalize.end_session()
 end
 

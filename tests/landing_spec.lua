@@ -1,4 +1,4 @@
-local git = require('llm_legion.git_helpers')
+local git = require('agents_in_a_chest.git_helpers')
 
 local function exec(cmd, cwd)
   if vim.system then

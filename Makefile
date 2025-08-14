@@ -7,7 +7,7 @@ ifneq ($(strip $(PLENARY)),)
 endif
 
 test:
-	NVIM_APPNAME=llm-legion-tests \
+	NVIM_APPNAME=agents-in-a-chest-tests \
 		nvim --headless -n -u tests/minimal.vim \
 		$(RTP_CMD) \
 		-c "PlenaryBustedDirectory tests/ { minimal_init = 'tests/minimal.vim' }" -c qa

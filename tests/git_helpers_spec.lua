@@ -2,7 +2,7 @@ local eq = assert.are.same
 
 describe('git_helpers cwd handling', function()
   it('returns error when cwd is missing without throwing', function()
-    local G = require('llm_legion.git_helpers')
+    local G = require('agents_in_a_chest.git_helpers')
     local missing = vim.fn.tempname()
     -- ensure path does not exist
     if vim.loop.fs_stat(missing) then vim.fn.delete(missing, 'rf') end

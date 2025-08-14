@@ -17,13 +17,13 @@ for _, p in ipairs(candidates) do
 end
 
 -- Load plugin under test
-local ok, mod = pcall(require, 'llm_legion')
+local ok, mod = pcall(require, 'agents_in_a_chest')
 if ok then mod.setup({}) end
 
 -- If Plenary isn’t available, print a clear message and exit
 vim.schedule(function()
   if vim.fn.exists(':PlenaryBustedDirectory') ~= 2 then
-    vim.api.nvim_err_writeln('[llm-legion tests] Plenary not found on rtp. Add tests/vendor/plenary.nvim or set PLENARY in Makefile.')
+    vim.api.nvim_err_writeln('[agents-in-a-chest tests] Plenary not found on rtp. Add tests/vendor/plenary.nvim or set PLENARY in Makefile.')
     vim.cmd('qa!')
   end
 end)

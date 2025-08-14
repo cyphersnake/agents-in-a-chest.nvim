@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-08-10
 
 ### Added
-- `:LLMEnd` to end a session and optionally land changes onto the base branch via Neogit (`git cherry-pick -n`).
+- `:AICEnd` to end a session and optionally land changes onto the base branch via Neogit (`git cherry-pick -n`).
 - Auto-finalize: closing the session tab/terminal triggers the same landing prompt automatically.
 - Prefilled commit message for landing via temporary `.git/LLM_EDITMSG` and `commit.template` override.
 - Safe stash/pop of dirty base branch before/after landing.
@@ -53,9 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-commit on session exit
 - Tab-based session management
 - Concurrent session support
-- `:LLMSession` command with `--name` and `--base` options
-- `:LLMAbort` command for graceful session termination
-- `:LLMCleanup` command for orphaned worktree cleanup
+- `:AICSession` command with `--name` and `--base` options
+- `:AICAbort` command for graceful session termination
+- `:AICCleanup` command for orphaned worktree cleanup
 - Automatic VimLeavePre cleanup handler
 - Path safety guard to prevent worktrees inside repository
 - Git lock retry with jitter backoff
@@ -66,8 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Worktrees are always created outside the repository
 - Provider CLIs require external authentication
 
-[Unreleased]: https://codeberg.org/cyphersnake/llm-legion.nvim/compare/v0.3.0...HEAD
-[0.3.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.3.0
-[0.2.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.2.0
-[0.1.1]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.1
-[0.1.0]: https://codeberg.org/cyphersnake/llm-legion.nvim/releases/tag/v0.1.0
+[Unreleased]: https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/compare/v0.3.0...HEAD
+[0.3.0]: https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/releases/tag/v0.3.0
+[0.2.0]: https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/releases/tag/v0.2.0
+[0.1.1]: https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/releases/tag/v0.1.1
+[0.1.0]: https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/releases/tag/v0.1.0

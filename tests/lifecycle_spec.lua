@@ -37,7 +37,7 @@ describe('lifecycle', function()
     vim.cmd('cd ' .. vim.fn.fnameescape(dir))
 
     -- configure plugin with dummy provider
-    local m = require('llm_legion')
+    local m = require('agents_in_a_chest')
     m.setup({
       providers = {
         claude = { cmd = 'sh', args = { '-c', 'true' } },
@@ -49,9 +49,9 @@ describe('lifecycle', function()
     vim.wait(1000)
 
     -- worktree dir removed, but branch created with commit if any changes
-    local _code, branches = sys({ 'git', 'for-each-ref', 'refs/heads/llm/claude/', '--format=%(refname:short)' }, dir)
+    local _code, branches = sys({ 'git', 'for-each-ref', 'refs/heads/aic/claude/', '--format=%(refname:short)' }, dir)
     branches = vim.trim(branches or '')
-    assert.is_true(branches == '' or branches:match('^llm/claude/.+') ~= nil)
+    assert.is_true(branches == '' or branches:match('^aic/claude/.+') ~= nil)
 
     -- no lingering worktree
     local _c2, wtl = sys({ 'git', 'worktree', 'list' }, dir)

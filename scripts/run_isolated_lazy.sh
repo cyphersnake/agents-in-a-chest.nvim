@@ -16,7 +16,7 @@ plugin_dir="${1:-${repo_root}}"
 sandbox_repo="${2:-}"
 
 # Isolated XDG locations so nothing leaks into your real config
-base="$(mktemp -d -t llm-legion-nvim-XXXXXX)"
+base="$(mktemp -d -t agents-in-a-chest-nvim-XXXXXX)"
 export XDG_DATA_HOME="${base}/data"
 export XDG_STATE_HOME="${base}/state"
 export XDG_CACHE_HOME="${base}/cache"
@@ -30,7 +30,7 @@ mkdir -p "${config_dir}"
 init_lua="${config_dir}/init.lua"
 
 cat >"${init_lua}" <<'LUA'
--- Isolated init.lua for llm-legion.nvim QA
+-- Isolated init.lua for agents-in-a-chest.nvim QA
 vim.opt.runtimepath:append(vim.env.PLUGIN_DIR)
 
 -- Try to use lazy.nvim if provided via $LAZY; fall back to rtp direct.
@@ -40,15 +40,15 @@ if lazypath and lazypath ~= '' then
     vim.opt.rtp:prepend(lazypath)
     local ok, lazy = pcall(require, 'lazy')
     if ok then
-      lazy.setup({ { dir = vim.env.PLUGIN_DIR, name = 'llm-legion.nvim' } }, {})
+      lazy.setup({ { dir = vim.env.PLUGIN_DIR, name = 'agents-in-a-chest.nvim' } }, {})
     else
-      vim.notify('[llm-legion QA] lazy.nvim found but failed to load; using direct rtp', vim.log.levels.WARN)
+      vim.notify('[agents-in-a-chest QA] lazy.nvim found but failed to load; using direct rtp', vim.log.levels.WARN)
     end
   else
-    vim.notify('[llm-legion QA] LAZY path not found; using direct rtp', vim.log.levels.WARN)
+    vim.notify('[agents-in-a-chest QA] LAZY path not found; using direct rtp', vim.log.levels.WARN)
   end
 else
-  vim.notify('[llm-legion QA] LAZY not set; using direct rtp', vim.log.levels.WARN)
+  vim.notify('[agents-in-a-chest QA] LAZY not set; using direct rtp', vim.log.levels.WARN)
 end
 
 -- Minimal UI/behavior to keep things predictable
@@ -57,10 +57,10 @@ vim.o.hidden = true
 vim.o.number = true
 
 -- Configure the plugin for offline QA: use `sh` provider that exits.
-local ok, llm = pcall(require, 'llm_legion')
+local ok, llm = pcall(require, 'agents_in_a_chest')
 if not ok then
   vim.schedule(function()
-    vim.notify('[llm-legion QA] failed to require plugin', vim.log.levels.ERROR)
+    vim.notify('[agents-in-a-chest QA] failed to require plugin', vim.log.levels.ERROR)
   end)
 else
   llm.setup({
@@ -72,7 +72,7 @@ end
 
 -- Handy command to kick a quick session
 vim.api.nvim_create_user_command('LLMQuick', function()
-  require('llm_legion').session_cmd({ 'claude', '--name', 'qa' })
+  require('agents_in_a_chest').session_cmd({ 'claude', '--name', 'qa' })
 end, {})
 
 LUA

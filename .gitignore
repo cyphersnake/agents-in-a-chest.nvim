@@ -1,6 +1,6 @@
 # Test artifacts
 tests/vendor/
-.llm-worktrees/
+.agents-worktrees/
 *.log
 
 # Neovim

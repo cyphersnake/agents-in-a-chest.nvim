@@ -48,7 +48,7 @@ describe('cleanup stability', function()
     vim.cmd('cd ' .. vim.fn.fnameescape(dir))
 
     -- configure plugin with dummy provider that exits immediately
-    local m = require('llm_legion')
+    local m = require('agents_in_a_chest')
     m.setup({
       providers = {
         claude = { cmd = 'sh', args = { '-c', 'true' } },

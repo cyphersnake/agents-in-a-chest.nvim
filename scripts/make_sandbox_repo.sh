@@ -6,7 +6,7 @@ set -euo pipefail
 
 target_dir="${1:-}"
 if [[ -z "${target_dir}" ]]; then
-  target_dir="$(mktemp -d -t llm-legion-sandbox-XXXXXX)"
+  target_dir="$(mktemp -d -t agents-in-a-chest-sandbox-XXXXXX)"
 else
   mkdir -p "${target_dir}"
 fi

@@ -1,8 +1,8 @@
 <div align="center">
 
-# llm-legion.nvim
+# agents-in-a-chest.nvim
 
-<img src=".img/logo.png" alt="llm-legion logo" width="400">
+<img src=".img/logo.png" alt="agents-in-a-chest logo" width="400">
 
 **Launch LLM coding agents in isolated Git worktrees**
 
@@ -20,7 +20,7 @@
 [![Neovim](https://img.shields.io/badge/Neovim-0.10+-blueviolet.svg?style=flat-square&logo=Neovim&logoColor=white)](https://neovim.io)
 [![Lua](https://img.shields.io/badge/Lua-blue.svg?style=flat-square&logo=lua)](http://www.lua.org)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
-[![Codeberg](https://img.shields.io/badge/Codeberg-2185D0?style=flat-square&logo=codeberg&logoColor=white)](https://codeberg.org/cyphersnake/llm-legion.nvim)
+[![Codeberg](https://img.shields.io/badge/Codeberg-2185D0?style=flat-square&logo=codeberg&logoColor=white)](https://codeberg.org/cyphersnake/agents-in-a-chest.nvim)
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Configuration](#configuration) • [Contributing](#contributing)
 
@@ -34,7 +34,7 @@ A focused flow: create a few agents, close them, then cherry-pick their work bac
 - 🚀 **Multiple agents**: start several sessions in parallel (one tab each)
 - 🔄 **Auto-commit on exit**: closing the tab finalizes the session safely
 - 🧭 **Cherry-pick landing**: use Neogit to land changes onto your base branch
-- 🌳 **Branch provenance**: `llm/...` branches are preserved for review/audits
+- 🌳 **Branch provenance**: `aic/...` branches are preserved for review/audits
 - 🧹 **Smart cleanup**: worktrees are cleaned; base branch is auto-stashed/restored if dirty
 - 🦀 **Rust smart cache**: optionally share a single Cargo `target/` at repo root across all sessions
 
@@ -42,14 +42,14 @@ A focused flow: create a few agents, close them, then cherry-pick their work bac
 
 ```vim
 " 1) Start a couple of agents
-:LLMSession claude --name refactor-auth
-:LLMSession codex  --name add-tests
+:AICSession claude --name refactor-auth
+:AICSession codex  --name add-tests
 
 " 2) Work with each agent in its tab
 
 " 3) Close the agent tabs when done
 "    On close: auto-commit, prompt to land via Neogit, cherry-pick -n
-"    Worktree is removed; branch llm/<provider>/<id>-<slug> is preserved
+"    Worktree is removed; branch aic/<provider>/<id>-<slug> is preserved
 ```
 
 ## 📦 Installation
@@ -58,22 +58,22 @@ A focused flow: create a few agents, close them, then cherry-pick their work bac
 
 ```lua
 {
-  "cyphersnake/llm-legion.nvim",
-  url = "https://codeberg.org/cyphersnake/llm-legion.nvim",
+  "cyphersnake/agents-in-a-chest.nvim",
+  url = "https://codeberg.org/cyphersnake/agents-in-a-chest.nvim",
   dependencies = {
-    "NeogitOrg/neogit",      -- Required for interactive landing (:LLMEnd)
+    "NeogitOrg/neogit",      -- Required for interactive landing (:AICEnd)
     "nvim-lua/plenary.nvim", -- Required for tests only
   },
-  cmd = { "LLMSession", "LLMAbort", "LLMCleanup", "LLMEnd" }, -- Load plugin when these commands are used
+  cmd = { "AICSession", "AICAbort", "AICCleanup", "AICEnd" }, -- Load plugin when these commands are used
   config = function()
-    require("llm_legion").setup({
+    require("agents_in_a_chest").setup({
       -- your configuration
     })
   end,
   keys = {
-    { "<leader>lc", "<cmd>LLMSession claude --name session<cr>", desc = "Claude session" },
-    { "<leader>lx", "<cmd>LLMSession codex --name session<cr>", desc = "Codex session" },
-    { "<leader>la", "<cmd>LLMAbort<cr>", desc = "Abort LLM session" },
+    { "<leader>lc", "<cmd>AICSession claude --name session<cr>", desc = "Claude session" },
+    { "<leader>lx", "<cmd>AICSession codex --name session<cr>", desc = "Codex session" },
+    { "<leader>la", "<cmd>AICAbort<cr>", desc = "Abort AIC session" },
   },
 }
 ```
@@ -82,12 +82,12 @@ A focused flow: create a few agents, close them, then cherry-pick their work bac
 
 ```lua
 use {
-  "cyphersnake/llm-legion.nvim",
+  "cyphersnake/agents-in-a-chest.nvim",
   requires = {
     { "NeogitOrg/neogit" },
   },
   config = function()
-    require("llm_legion").setup({})
+    require("agents_in_a_chest").setup({})
   end
 }
 ```
@@ -96,7 +96,7 @@ use {
 
 ```vim
 Plug 'NeogitOrg/neogit'
-Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
+Plug 'https://codeberg.org/cyphersnake/agents-in-a-chest.nvim'
 ```
 
 ## 🚀 Usage
@@ -105,8 +105,8 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 
 ```vim
 " 1) Create a few agents (parallel tabs)
-:LLMSession claude --name refactor-auth      " base: HEAD by default
-:LLMSession codex  --name add-tests --base develop
+:AICSession claude --name refactor-auth      " base: HEAD by default
+:AICSession codex  --name add-tests --base develop
 
 " 2) Collaborate with each agent in its tab
 "    Edit, run, iterate — all inside isolated worktrees
@@ -119,14 +119,14 @@ Plug 'https://codeberg.org/cyphersnake/llm-legion.nvim'
 ```
 
 Notes:
-- `:LLMEnd` is optional; closing the tab runs the same finalize flow.
-- `:LLMAbort` force-ends the current session (also safe).
-- `:LLMCleanup` removes orphan worktrees if anything gets stuck.
+- `:AICEnd` is optional; closing the tab runs the same finalize flow.
+- `:AICAbort` force-ends the current session (also safe).
+- `:AICCleanup` removes orphan worktrees if anything gets stuck.
 
 ## ⚙️ Configuration
 
 ```lua
-require("llm_legion").setup({
+require("agents_in_a_chest").setup({
   -- Custom worktree location (default: auto-computed)
   worktrees_root = nil,
   
@@ -190,7 +190,7 @@ providers = {
 
 ```lua
 -- Place all worktrees in /tmp for ephemeral sessions
-worktrees_root = "/tmp/llm-sessions",
+worktrees_root = "/tmp/aic-sessions",
 
 -- Or use a custom prefix
 worktrees_prefix = "ai-sandbox",
@@ -201,7 +201,7 @@ worktrees_prefix = "ai-sandbox",
 
 - **Neovim** ≥ 0.10
 - **Git** with worktree support
-- **Neogit** for interactive landing via `:LLMEnd`
+- **Neogit** for interactive landing via `:AICEnd`
 - **LLM CLI tools** installed and authenticated:
   - [Claude CLI](https://docs.anthropic.com/claude/docs/claude-cli)
   - [Codex](https://github.com/microsoft/codex)
@@ -224,8 +224,8 @@ nvim --headless -u tests/minimal.vim \
 ## 🗺️ Roadmap
 
 - [ ] **Session Management**
-  - [ ] List active sessions (`:LLMList`)
-  - [ ] Switch between sessions (`:LLMSwitch`)
+  - [ ] List active sessions (`:AICList`)
+  - [ ] Switch between sessions (`:AICSwitch`)
   - [ ] Session history and replay
 
 - [ ] **Enhanced Providers**
@@ -283,8 +283,8 @@ MIT - see [LICENSE](LICENSE) file for details.
 
 ## 💬 Support
 
-- **Issues**: [Codeberg Issues](https://codeberg.org/cyphersnake/llm-legion.nvim/issues)
-- **Mirror**: [GitHub Mirror](https://github.com/cyphersnake/llm-legion.nvim) (read-only)
+- **Issues**: [Codeberg Issues](https://codeberg.org/cyphersnake/agents-in-a-chest.nvim/issues)
+- **Mirror**: [GitHub Mirror](https://github.com/cyphersnake/agents-in-a-chest.nvim) (read-only)
 
 ---
 
